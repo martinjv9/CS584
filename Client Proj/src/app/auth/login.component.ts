@@ -1,10 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input'
 import { MatButtonModule } from '@angular/material/button';
 import { LoginRequest } from './login-request';
+import { AuthService } from './auth.service';
+import { routes } from '../app.routes';
+import { environment } from '../../environments/environment.development';
 
 
 
@@ -25,7 +28,8 @@ export class LoginComponent implements OnInit {
 
   form!: FormGroup;
 
-  constructor(){
+
+  constructor(private authService: AuthService, private router: Router){
   }
 
   ngOnInit(): void {
@@ -41,8 +45,16 @@ export class LoginComponent implements OnInit {
       password: this.form.controls["password"].value
     };
 
-    
+    this.authService.login(loginRequest).subscribe({
+      next: result => {
+        if(result.success) {
+          this.router.navigate(['/']);
+        }
+      },
+      error: error => console.error(error)
+    })
 
+    
   }
   
 }
