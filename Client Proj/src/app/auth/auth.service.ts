@@ -27,10 +27,17 @@ export class AuthService {
     }));
   }
 
-  logout(){}
+  logout(){
+    localStorage.removeItem("accessToken");
+    this.setAuthStatus(false);
+  }
 
   private setAuthStatus(status: boolean) {
     this._authStatus.next(status);
+  }
+
+  public isAuthenticated():boolean {
+    return localStorage.getItem("accessToken") != null;
   }
 
 }
