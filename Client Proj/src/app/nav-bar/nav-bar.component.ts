@@ -1,10 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../auth/auth.service';
-import { takeUntil } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-nav-bar',
@@ -12,12 +12,27 @@ import { takeUntil } from 'rxjs';
   templateUrl: './nav-bar.component.html',
   styleUrl: './nav-bar.component.scss'
 })
-export class NavBarComponent {
-  isLoggedIn: boolean = false;
-
+export class NavBarComponent implements OnInit, OnDestroy{
+  public isLoggedIn: boolean = false;
+  private destroySubject = new Subject();
+  
   constructor(private authService: AuthService){
-    authService.authStatus.pipe(takeUntil()).subscribe(
-      value => this.isLoggedIn = value)
+    authService.authStatus.pipe(takeUntil(this.destroySubject)).subscribe(
+      result => this.isLoggedIn = result)
+    }
+    
+  logout() {
+    this.authService.logout();
+  }
+    
+  ngOnInit(): void {
+    // Check login status: true or false
+    this.isLoggedIn = this.authService.isAuthenticated();
+  }
+
+  ngOnDestroy(): void {
+    this.destroySubject.next(true);
+    this.destroySubject.complete();
   }
 
 
